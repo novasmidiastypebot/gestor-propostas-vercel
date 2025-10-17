@@ -1,12 +1,8 @@
 # 🔐 Servidor Proxy - Integração Efí (mTLS)
-
 Servidor intermediário para comunicação entre Base44 e API da Efí.
-
 ## 📋 Por que este proxy é necessário?
-
 A API da Efí exige **mTLS** (Mutual TLS), que requer envio de certificado client-side (.p12). 
 O Deno Deploy (usado pelo Base44) não suporta isso nativamente.
-
 **Este proxy resolve o problema:**
 - ✅ Roda em ambiente Node.js (Vercel)
 - ✅ Suporta certificado .p12
