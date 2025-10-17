@@ -90,7 +90,26 @@ module.exports = async (req, res) => {
     switch (action) {
       case 'create_plan':
         console.log('📤 Criando plano na Efí...');
-        response = await gerencianet.createPlan({}, data);
+        
+        // ✅ Formato correto da API Efí
+        const planPayload = {
+          name: data.name,
+          interval: data.interval,
+          repeats: data.repeats || null
+        };
+        
+        // Adicionar items se tiver valor
+        if (data.value && data.value > 0) {
+          planPayload.items = [{
+            name: data.name,
+            amount: 1,
+            value: Math.round(data.value * 100) // Converter para centavos
+          }];
+        }
+        
+        console.log('📦 Payload enviado:', planPayload);
+        
+        response = await gerencianet.createPlan({}, planPayload);
         console.log('✅ Plano criado:', response.data.plan_id);
         
         // Limpar certificado temporário
