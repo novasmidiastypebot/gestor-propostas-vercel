@@ -8,9 +8,9 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
-    "gn-api-sdk-node": "^2.2.2"
+    "sdk-node-apis-efi": "^2.3.2"
   },
   "engines": {
-    "node": ">=14.x"
+    "node": "18.x"
   }
 }
