@@ -91,8 +91,6 @@ module.exports = async (req, res) => {
       case 'create_plan':
         console.log('📤 Criando plano na Efí...');
         
-        // ✅ Formato correto da API Efí - plano SEM valor
-        // O valor será definido na criação da assinatura
         const planPayload = {
           name: data.name,
           interval: data.interval,
@@ -101,58 +99,163 @@ module.exports = async (req, res) => {
         
         console.log('📦 Payload enviado:', planPayload);
         
-        response = await gerencianet.createPlan({}, planPayload);
-        console.log('✅ Plano criado:', response.data.plan_id);
-        
-        // Limpar certificado temporário
-        if (process.env.EFI_CERTIFICATE_BASE64) {
-          fs.unlinkSync(certificatePath);
+        try {
+          response = await gerencianet.createPlan({}, planPayload);
+          console.log('🔍 Resposta COMPLETA do SDK:', JSON.stringify(response, null, 2));
+          
+          // Verificar diferentes formatos de resposta
+          const planId = response?.data?.plan_id || response?.plan_id || response?.id;
+          
+          if (!planId) {
+            console.error('❌ Plan ID não encontrado na resposta:', response);
+            return res.status(500).json({
+              error: 'Plan ID não encontrado na resposta da Efí',
+              response: response
+            });
+          }
+          
+          console.log('✅ Plano criado:', planId);
+          
+          // Limpar certificado temporário
+          if (process.env.EFI_CERTIFICATE_BASE64) {
+            fs.unlinkSync(certificatePath);
+          }
+          
+          return res.json({ 
+            success: true,
+            plan_id: planId,
+            full_response: response
+          });
+          
+        } catch (planError) {
+          console.error('❌ Erro ao criar plano:', planError);
+          
+          // Limpar certificado temporário
+          if (process.env.EFI_CERTIFICATE_BASE64) {
+            try {
+              fs.unlinkSync(certificatePath);
+            } catch (e) { /* ignorar */ }
+          }
+          
+          return res.status(500).json({
+            error: 'Erro ao criar plano na Efí',
+            details: planError.message,
+            code: planError.code,
+            response: planError.response?.data || planError
+          });
         }
+
+      case 'create_subscription':
+        console.log('📤 Criando assinatura na Efí...');
         
-        return res.json({ 
-          plan_id: response.data.plan_id,
-          full_response: response.data
-        });
+        try {
+          response = await gerencianet.createSubscription({}, data);
+          console.log('✅ Assinatura criada:', response.data.subscription_id);
+          
+          // Limpar certificado temporário
+          if (process.env.EFI_CERTIFICATE_BASE64) {
+            fs.unlinkSync(certificatePath);
+          }
+          
+          return res.json({ 
+            success: true,
+            subscription_id: response.data.subscription_id,
+            charge_id: response.data.charge?.id,
+            payment_data: response.data.payment,
+            full_response: response.data
+          });
+        } catch (subError) {
+          console.error('❌ Erro ao criar assinatura:', subError);
+          
+          // Limpar certificado temporário
+          if (process.env.EFI_CERTIFICATE_BASE64) {
+            try {
+              fs.unlinkSync(certificatePath);
+            } catch (e) { /* ignorar */ }
+          }
+          
+          return res.status(500).json({
+            error: 'Erro ao criar assinatura na Efí',
+            details: subError.message,
+            code: subError.code,
+            response: subError.response?.data || subError
+          });
+        }
 
       case 'configure_webhook':
         console.log('📤 Configurando webhook na Efí...');
         
         const { chave, url } = data;
         
-        // Configurar webhook para a chave Pix
-        response = await gerencianet.pixConfigWebhook({
-          chave: chave
-        }, {
-          webhookUrl: url
-        });
-        
-        console.log('✅ Webhook configurado');
-        
-        // Limpar certificado temporário
-        if (process.env.EFI_CERTIFICATE_BASE64) {
-          fs.unlinkSync(certificatePath);
+        try {
+          // Configurar webhook para a chave Pix
+          response = await gerencianet.pixConfigWebhook({
+            chave: chave
+          }, {
+            webhookUrl: url
+          });
+          
+          console.log('✅ Webhook configurado');
+          
+          // Limpar certificado temporário
+          if (process.env.EFI_CERTIFICATE_BASE64) {
+            fs.unlinkSync(certificatePath);
+          }
+          
+          return res.json({ 
+            success: true,
+            message: 'Webhook configurado com sucesso',
+            full_response: response.data
+          });
+        } catch (webhookError) {
+          console.error('❌ Erro ao configurar webhook:', webhookError);
+          
+          // Limpar certificado temporário
+          if (process.env.EFI_CERTIFICATE_BASE64) {
+            try {
+              fs.unlinkSync(certificatePath);
+            } catch (e) { /* ignorar */ }
+          }
+          
+          return res.status(500).json({
+            error: 'Erro ao configurar webhook',
+            details: webhookError.message,
+            response: webhookError.response?.data || webhookError
+          });
         }
-        
-        return res.json({ 
-          success: true,
-          message: 'Webhook configurado com sucesso',
-          full_response: response.data
-        });
 
       case 'cancel_subscription':
         console.log('📤 Cancelando assinatura na Efí...');
-        response = await gerencianet.cancelSubscription({ id: data.subscription_id }, {});
-        console.log('✅ Assinatura cancelada');
         
-        // Limpar certificado temporário
-        if (process.env.EFI_CERTIFICATE_BASE64) {
-          fs.unlinkSync(certificatePath);
+        try {
+          response = await gerencianet.cancelSubscription({ id: data.subscription_id }, {});
+          console.log('✅ Assinatura cancelada');
+          
+          // Limpar certificado temporário
+          if (process.env.EFI_CERTIFICATE_BASE64) {
+            fs.unlinkSync(certificatePath);
+          }
+          
+          return res.json({ 
+            success: true,
+            message: 'Assinatura cancelada com sucesso'
+          });
+        } catch (cancelError) {
+          console.error('❌ Erro ao cancelar assinatura:', cancelError);
+          
+          // Limpar certificado temporário
+          if (process.env.EFI_CERTIFICATE_BASE64) {
+            try {
+              fs.unlinkSync(certificatePath);
+            } catch (e) { /* ignorar */ }
+          }
+          
+          return res.status(500).json({
+            error: 'Erro ao cancelar assinatura',
+            details: cancelError.message,
+            response: cancelError.response?.data || cancelError
+          });
         }
-        
-        return res.json({ 
-          success: true,
-          message: 'Assinatura cancelada com sucesso'
-        });
 
       default:
         return res.status(400).json({ 
