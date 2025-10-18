@@ -91,21 +91,13 @@ module.exports = async (req, res) => {
       case 'create_plan':
         console.log('📤 Criando plano na Efí...');
         
-        // ✅ Formato correto da API Efí
+        // ✅ Formato correto da API Efí - plano SEM valor
+        // O valor será definido na criação da assinatura
         const planPayload = {
           name: data.name,
           interval: data.interval,
           repeats: data.repeats || null
         };
-        
-        // Adicionar items se tiver valor
-        if (data.value && data.value > 0) {
-          planPayload.items = [{
-            name: data.name,
-            amount: 1,
-            value: Math.round(data.value * 100) // Converter para centavos
-          }];
-        }
         
         console.log('📦 Payload enviado:', planPayload);
         
