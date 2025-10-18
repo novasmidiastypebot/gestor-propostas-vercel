@@ -122,23 +122,6 @@ module.exports = async (req, res) => {
           full_response: response.data
         });
 
-      case 'create_subscription':
-        console.log('📤 Criando assinatura na Efí...');
-        response = await gerencianet.createSubscription({}, data);
-        console.log('✅ Assinatura criada:', response.data.subscription_id);
-        
-        // Limpar certificado temporário
-        if (process.env.EFI_CERTIFICATE_BASE64) {
-          fs.unlinkSync(certificatePath);
-        }
-        
-        return res.json({ 
-          subscription_id: response.data.subscription_id,
-          charge_id: response.data.charge?.id,
-          payment_data: response.data.payment,
-          full_response: response.data
-        });
-
       case 'configure_webhook':
         console.log('📤 Configurando webhook na Efí...');
         
