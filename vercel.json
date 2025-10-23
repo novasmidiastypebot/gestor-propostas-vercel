@@ -6,16 +6,6 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/efi",
-      "dest": "/api/efi"
-    },
-    {
-      "src": "/api/health",
-      "dest": "/api/health"
-    }
-  ],
   "env": {
     "NODE_ENV": "production"
   }
