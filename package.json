@@ -1,0 +1,14 @@
+{
+  "name": "efi-proxy",
+  "version": "5.0.0",
+  "description": "Servidor proxy para integração com API Efí (suporte a mTLS)",
+  "main": "api/efi.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": "22.x"
+  }
+}
